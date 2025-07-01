@@ -55,24 +55,18 @@ def compute_heart_rate(signal, fps, min_hr=48, max_hr=180):
     if n < 10:
         return None
     
-    # 信号预处理
     detrended = signal - np.mean(signal)
     window = np.hanning(n)
     windowed = detrended * window
     
-    # FFT变换
     fft_result = fft(windowed)
     freqs = fftfreq(n, d=1.0/fps)
     
-    # 只保留正频率部分
     half_n = n // 2
     freqs = freqs[:half_n]
     magnitudes = np.abs(fft_result[:half_n])
     
-    # 转换为BPM
     bpm_freqs = freqs * 60.0
-    
-    # 限制在合理的心率范围内
     valid_mask = (bpm_freqs > min_hr) & (bpm_freqs < max_hr)
     valid_freqs = bpm_freqs[valid_mask]
     valid_magnitudes = magnitudes[valid_mask]
@@ -80,7 +74,6 @@ def compute_heart_rate(signal, fps, min_hr=48, max_hr=180):
     if len(valid_freqs) == 0:
         return None
     
-    # 寻找峰值
     peaks, _ = find_peaks(valid_magnitudes, height=0)
     if len(peaks) == 0:
         return None
@@ -99,7 +92,8 @@ def main():
     fps = cap.get(cv2.CAP_PROP_FPS)
     print(f"视频帧率: {fps:.2f} FPS")
     
-    # 设置滑动窗口(10秒数据)
+    wait_time = int(1000 / fps)  # 根据帧率控制播放速度
+
     window_size = int(fps * 10)
     green_values = deque(maxlen=window_size)
     heart_rate_history = deque(maxlen=100)
@@ -132,7 +126,6 @@ def main():
             _, g_avg, _ = calculate_rgb_average(forehead_roi)
             green_values.append(g_avg)
             
-            # 每0.5秒计算一次心率
             if frame_count % max(1, int(fps / 2)) == 0 and len(green_values) > max(10, fps * 2):
                 current_hr = compute_heart_rate(list(green_values), fps)
                 
@@ -144,7 +137,6 @@ def main():
                     if PLOTTING_ENABLED:
                         update_plots(ax1, ax2, list(green_values), list(heart_rate_history), fps)
         
-        # 显示心率信息
         if current_hr is not None:
             hr_text = f"Heart Rate: {current_hr:.1f} BPM"
             cv2.putText(frame, hr_text, (10, 30), 
@@ -152,9 +144,8 @@ def main():
         
         cv2.imshow('Heart Rate Estimation', frame)
         
-        # 修改为第一段代码的播放模式: 长等待时间，只有按'q'才退出
-        key = cv2.waitKey(10000)  # 等待10秒或按键
-        if key == ord('q'):  # 只有按'q'键才退出
+        key = cv2.waitKey(wait_time)
+        if key == ord('q'):
             break
     
     cap.release()
