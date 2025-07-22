@@ -4,7 +4,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 # Read CSV file (replace with your actual file path)
-file_path = "/Users/suziteng/Documents/GitHub/Computational-estimates-of-heart-rate-in-pre-recorded-videos/7.19/video1:FFT01:heart_rate_data_20250704_103631 copy.csv"
+file_path = "/Users/suziteng/Documents/GitHub/Computational-estimates-of-heart-rate-in-pre-recorded-videos/7.19/video2:FFT02:heart_rate_data_20250717_180825.csv"
 df = pd.read_csv(file_path)
 
 # Data preprocessing
