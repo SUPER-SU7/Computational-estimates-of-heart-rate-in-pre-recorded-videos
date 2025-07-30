@@ -10,7 +10,11 @@
 `FFT03.py` - Full-face heart rate detection (no specific feature tracking)  
 `FFT04.py` -  can monitor heart rate by capturing faces through custom rectangles
 Each script generates a `.csv` file containing timestamp and heart rate data when executed.
-`FFT05.py` - 
+`FFT05.py` - This is an optional multi-functional executable file that can switch to support "green", "gray", and "pca "(in the main function). g → Use the green channel for heart rate estimation 
+y → Use the average value of the grayscale image 
+p → Use the principal components of PCA as signals 
+s → Save the current heart rate data as CSV 
+q → Exit the program
 
 `line.py` - Visualization tool that processes the generated `.csv` files and creates plots
 
