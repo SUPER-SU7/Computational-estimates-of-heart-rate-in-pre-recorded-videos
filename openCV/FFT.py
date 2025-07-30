@@ -1,14 +1,17 @@
+#单一的抓取实时的心率，可以在视频中实时显示出来，但是没有折线图
+
+
 import cv2
 import numpy as np
 import sys
 from collections import deque
 
-# 尝试导入必要的库
+# Try to import necessary libraries
 try:
     from scipy.fftpack import fft, fftfreq 
     from scipy.signal import find_peaks
 except ImportError:
-    print("错误：未找到 scipy 库。请运行以下命令安装：")
+    print("Error: SciPy library not found. Please install with:")
     print("pip install scipy")
     sys.exit(1)
 
@@ -18,15 +21,16 @@ try:
 except ImportError:
     PLOTTING_ENABLED = False
 
+# Implement face detection function
 def detect_face(img):
-    """检测人脸并返回最大的人脸区域"""
+    """Detect faces and return the largest face region"""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     cascade_path = '/Users/suziteng/Documents/GitHub/Computational-estimates-of-heart-rate-in-pre-recorded-videos/XML/haarcascade_frontalface_default.xml'
     
     try:
         face_detect = cv2.CascadeClassifier(cascade_path)
     except:
-        print(f"错误：无法加载级联分类器 {cascade_path}")
+        print(f"Error: Unable to load cascade classifier {cascade_path}")
         return None
     
     faces = face_detect.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
@@ -35,8 +39,9 @@ def detect_face(img):
         return max(faces, key=lambda rect: rect[2] * rect[3])
     return None
 
+# Locate forehead region
 def get_forehead_region(face_rect):
-    """从人脸区域中提取额头区域"""
+    """Extract forehead region from face rectangle"""
     x, y, w, h = face_rect
     forehead_height = int(h * 0.25)
     forehead_width = int(w * 0.6)
@@ -46,11 +51,12 @@ def get_forehead_region(face_rect):
     return (forehead_x, forehead_y, forehead_width, forehead_height)
 
 def calculate_rgb_average(roi):
-    """计算ROI区域的平均RGB值"""
+    """Calculate average RGB values of ROI region"""
     return np.mean(roi, axis=(0, 1))
 
+# Core heart rate calculation algorithm
 def compute_heart_rate(signal, fps, min_hr=48, max_hr=180):
-    """使用FFT计算心率值(BPM)"""
+    """Calculate heart rate (BPM) using FFT"""
     n = len(signal)
     if n < 10:
         return None
@@ -81,18 +87,19 @@ def compute_heart_rate(signal, fps, min_hr=48, max_hr=180):
     max_idx = peaks[np.argmax(valid_magnitudes[peaks])]
     return valid_freqs[max_idx]
 
+# Main function
 def main():
-    video_path = '/Users/suziteng/Documents/GitHub/Computational-estimates-of-heart-rate-in-pre-recorded-videos/face.MOV'
+    video_path = '/Users/suziteng/Documents/GitHub/Computational-estimates-of-heart-rate-in-pre-recorded-videos/face1.mp4'
     
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        print("无法打开视频文件")
+        print("Error: Unable to open video file")
         return
     
     fps = cap.get(cv2.CAP_PROP_FPS)
-    print(f"视频帧率: {fps:.2f} FPS")
+    print(f"Video frame rate: {fps:.2f} FPS")
     
-    wait_time = int(1000 / fps)  # 根据帧率控制播放速度
+    wait_time = int(1000 / fps)  # Control playback speed based on frame rate
 
     window_size = int(fps * 10)
     green_values = deque(maxlen=window_size)
@@ -105,6 +112,7 @@ def main():
     frame_count = 0
     current_hr = None
     
+    # Video processing loop
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -114,6 +122,7 @@ def main():
         
         face_rect = detect_face(frame)
         
+        # Face detection
         if face_rect is not None:
             x, y, w, h = face_rect
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
@@ -123,6 +132,7 @@ def main():
             
             cv2.rectangle(frame, (fx, fy), (fx+fw, fy+fh), (0, 255, 0), 2)
             
+            # Signal acquisition
             _, g_avg, _ = calculate_rgb_average(forehead_roi)
             green_values.append(g_avg)
             
@@ -132,7 +142,7 @@ def main():
                 if current_hr is not None:
                     heart_rate_history.append(current_hr)
                     avg_hr = np.mean(list(heart_rate_history)[-10:]) if heart_rate_history else current_hr
-                    print(f"当前心率: {avg_hr:.1f} BPM")
+                    print(f"Current heart rate: {avg_hr:.1f} BPM")
                     
                     if PLOTTING_ENABLED:
                         update_plots(ax1, ax2, list(green_values), list(heart_rate_history), fps)
@@ -155,8 +165,9 @@ def main():
         plt.ioff()
         plt.show()
 
+# Data visualization
 def update_plots(ax1, ax2, signal, heart_rates, fps):
-    """更新实时绘图"""
+    """Update real-time plots"""
     ax1.clear()
     ax2.clear()
     
@@ -170,7 +181,7 @@ def update_plots(ax1, ax2, signal, heart_rates, fps):
         ax2.set_xlabel('Time (s)')
         ax2.set_ylabel('BPM')
         
-        time_axis = np.arange(len(heart_rates)) * 0.5
+        time_axis = np.arange(len(heart_rates)) * 0.1
         ax2.plot(time_axis, heart_rates, 'b-')
         ax2.plot(time_axis, heart_rates, 'ro')
         
