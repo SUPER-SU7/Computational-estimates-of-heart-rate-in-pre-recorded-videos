@@ -8,7 +8,7 @@
 `FFT01.py` - Heart rate detection via forehead tracking  
 `FFT02.py` - Heart rate detection using forehead, cheeks, and nose features  
 `FFT03.py` - Full-face heart rate detection (no specific feature tracking)  
-
+`FFT04.py` -  can monitor heart rate by capturing faces through custom rectangles
 Each script generates a `.csv` file containing timestamp and heart rate data when executed.
 
 `line.py` - Visualization tool that processes the generated `.csv` files and creates plots
@@ -27,7 +27,7 @@ FFT02.py是通过额头，脸颊，鼻子检测心率的文件
 FFT03.py是通过全脸检测心率的文件，不涉及到抓取特征
 每次执行他们各自都可以生成一个.csv文件，用于存储数据（时间，心率）
 line.py 是一个执行文件，他可以通过抓取固定的.csv文件，并且将她们可视化
-
+FFT04.py可以通过自定义矩形抓取面部从而完成心率监测
 
 
 视频顺序介绍：
