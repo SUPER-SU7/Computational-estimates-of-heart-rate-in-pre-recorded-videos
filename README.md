@@ -15,6 +15,8 @@ y → Use the average value of the grayscale image
 p → Use the principal components of PCA as signals 
 s → Save the current heart rate data as CSV 
 q → Exit the program
+`FFT06.py` - hue (tone) saturation(Saturation)value(Lightness) 
+Press the h, s, and v keys to clear the level to switch between the three modes. Press the q key to exit the program
 
 `line.py` - Visualization tool that processes the generated `.csv` files and creates plots
 
@@ -39,6 +41,7 @@ y → 使用灰度图像平均值
 p → 使用 PCA 主成分作为信号
 s → 保存当前心率数据为 CSV
 q → 退出程序
-
+FFT06 HSV模式：hue（色调）saturation(饱和度)value(明度)
+通关摁键h，s，v可以切换三种模式 摁键q退出程序
 在 main() 中添加一个配置参数 signal_mode，支持 "green", "gray", "pca"。
 signal_mode = "green"  # Options: "green", "gray", "pca"
